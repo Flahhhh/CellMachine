@@ -13,6 +13,7 @@ namespace Models
         public long descendantCount = 0;
         public long heirCount = 0;
         public int[] gene = new int[Settings.gameConfig.geneSize];
+        public int[] triggers = new int[Settings.gameConfig.geneSize];
 
         public Colony(Color color, int? ancestorID=null)
         {

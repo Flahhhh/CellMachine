@@ -10,6 +10,10 @@ namespace Models
         {
             return ActionType.NONE;
         }
+        public ActionType step()
+        {
+            return ActionType.NONE;
+        }
         public Tile() {}
     }
 }

@@ -18,7 +18,7 @@ namespace Models
             return energy;
         }
 
-        public ActionType step(CellViewObject cellViewObject)
+        public ActionType step()
         {
             energy *= Settings.gameConfig.foodDecayingFactor;
             return ActionType.NONE;
