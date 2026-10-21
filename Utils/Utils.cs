@@ -1,52 +1,53 @@
 using System.Drawing;
 using System.Dynamic;
+using Const;
 using Models;
 
 namespace Utils
 {
     public static class GeneralUtils
     {
-        public static Color GenerateRandomColor(int seed)
+        public static Color GenerateRandomColor()
         {
-            Random random = new Random(seed);
             return Color.FromArgb(
-                Random.Shared.Next(256),
-                Random.Shared.Next(256),
-                Random.Shared.Next(256)
+                Constants.random.Next(256),
+                Constants.random.Next(256),
+                Constants.random.Next(256)
             );
         }
     }
     public static class GeneticUtils
     {
-        public static Genome Mutation(int geneSize, int triggersCount, int[] gene, int[] triggers, double mutationChance, int seed = 42)
+        public static Genome Mutation(int geneSize, int triggersCount, int[] gene, int[] triggers, double mutationChance)
         {
-            Random random = new Random(seed);
+            int[] newGene = gene.ToArray(), newTriggers = triggers.ToArray();
 
             for (int i=0; i<geneSize; i++)
             {
-                if (random.NextDouble() > mutationChance) continue;
+                if (Constants.random.NextDouble() > mutationChance) continue;
 
-                switch (random.Next(3))
+                switch (Constants.random.Next(3))
                 {
                     case 0:
                         //Gene Uniform
-                        gene[i] = (gene[i] + random.Next(0, geneSize)) % geneSize;
+                        newGene[i] = (newGene[i] + Constants.random.Next(0, geneSize)) % geneSize;
                         break;
                     case 1:
                         //Gene Inversion
-                        gene[i] = geneSize - gene[i] - 1;
+                        newGene[i] = geneSize - newGene[i] - 1;
                         break;
                     case 2:
                         //Trigger Modification
-                        triggers[i] = random.Next(triggersCount);
+                        newTriggers[i] = Constants.random.Next(triggersCount);
                         break;
                 }
             }
+
+            return new Genome{gene=newGene, triggers=newTriggers};
         }
 
-        public static Genome GenerateRandomGene(int geneSize, int triggersCount, int seed = 42, string geneType = "Fixed")
+        public static Genome GenerateRandomGene(int geneSize, int triggersCount, string geneType = "Fixed")
         {
-            Random random = new Random(seed);
 
             int[] gene = new int[geneSize], triggers = new int[geneSize];
 
@@ -54,18 +55,18 @@ namespace Utils
             {
                 if (geneType == "Fixed")
                 {
-                    gene[i] = random.Next(geneSize);
+                    gene[i] = Constants.random.Next(geneSize);
                 }
-                else if (geneType == "Moving")
-                {
-                    gene[i] = random.Next(-geneSize, geneSize);
-                }
+                //else if (geneType == "Moving")
+                //{
+                //    gene[i] = Constants.random.Next(-geneSize, geneSize);
+                //}
                 else
                 {
                     throw new Exception("Ошибка: Неизвестный тип гена");
                 }
 
-                triggers[i] = random.Next(triggersCount);
+                triggers[i] = Constants.random.Next(triggersCount);
             }
 
             return new Genome { gene = gene, triggers = triggers };
@@ -96,14 +97,13 @@ namespace Utils
             return shift;
         }
 
-        public static HashSet<Pos> GenerateUniquePoses(int n, int h, int w, int seed = 42)
+        public static HashSet<Pos> GenerateUniquePoses(int n, int h, int w)
         {
-            Random random = new Random(seed);
             HashSet<Pos> poses = new HashSet<Pos>();
             while (poses.Count() < n)
             {
-                int x = random.Next(0, w - 1);
-                int y = random.Next(0, h - 1);
+                int x = Constants.random.Next(w);
+                int y = Constants.random.Next(h);
                 poses.Add(new Pos { x = x, y = y });
             }
 

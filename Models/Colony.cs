@@ -36,7 +36,7 @@ namespace Models
 
         public Colony GenerateNewColony()
         {
-            Genome newGenome = GeneticUtils.Mutation(GameConfig.geneSize, GameConfig.triggersCount, gene, triggers, GameConfig.randomSeed);
+            Genome newGenome = GeneticUtils.Mutation(GameConfig.geneSize, GameConfig.triggersCount, gene, triggers, GameConfig.genomeMutationChance, GameConfig.randomSeed);
             Color newColor = SelectNewColor();
             int newAncestorID;
 

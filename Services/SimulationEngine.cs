@@ -10,7 +10,6 @@ namespace Services
     {
         private Tile[,] board = new Tile[BoardConfig.height, BoardConfig.width];
         private List<Colony> colonies = new List<Colony>();
-        private Random random = new Random(GameConfig.randomSeed);
 
         public void Init_board()
         {
@@ -22,7 +21,7 @@ namespace Services
                 }
             }
 
-            foreach (Pos pos in SimUtils.GenerateUniquePoses(GameConfig.initColoniesCount, BoardConfig.height, BoardConfig.width, GameConfig.randomSeed))
+            foreach (Pos pos in SimUtils.GenerateUniquePoses(GameConfig.initColoniesCount, BoardConfig.height, BoardConfig.width))
             {
                 Colony colony = new Colony();
                 colonies.Add(colony);
@@ -156,7 +155,7 @@ namespace Services
                     Pos divPos = FindDivisionPose(y, x, selectedCell.Orientation);
                     if (divPos.x == -1) break;
                     
-                    if (random.NextDouble() > GameConfig.genomeMutationChance)
+                    if (Constants.random.NextDouble() > GameConfig.genomeMutationChance)
                     {
                         colony = selectedCell.colony;
                     } else
@@ -164,8 +163,8 @@ namespace Services
                         colony = selectedCell.colony.GenerateNewColony();
                     }
 
-                    selectedCell.DivideEnergy();
                     board[divPos.y, divPos.x] = new Cell(colony, selectedCell.energy/2);
+                    selectedCell.DivideEnergy();
 
                     break;
                 default:
@@ -175,14 +174,16 @@ namespace Services
 
         public Pos FindDivisionPose(int y, int x, Orientation orientation)
         {
-            Pos shift;
-            
+            Pos shift, newPos;
+
             for (int i=0; i<4; i++)
             {
                 shift = SimUtils.GetShift((Orientation)(((int)orientation+i)%4));
-                if (BoardConfig.height>y && y>=0 && BoardConfig.width>x && x>=0 && !(board[y,x] is Cell))
+                newPos = new Pos{x=x+shift.x, y=y+shift.y};
+                
+                if (BoardConfig.height>newPos.y && newPos.y>=0 && BoardConfig.width>newPos.x && newPos.x>=0 && !(board[newPos.y,newPos.x] is Cell))
                 {
-                    return new Pos {y=y+shift.y, x=x+shift.x};                    
+                    return newPos;                    
                 }
             }
 
@@ -217,7 +218,7 @@ namespace Services
                 }
                 else if (tile is Cell)
                 {
-                    if (((Cell)tile).colonyID == ((Cell)tile).colonyID)
+                    if (((Cell)board[y,x]).colonyID == ((Cell)tile).colonyID)
                     {
                         cellViewObject = CellViewObject.ALLIE;
                     }
@@ -241,7 +242,7 @@ namespace Services
             simData["height"] = BoardConfig.height;
             simData["width"] = BoardConfig.width;
 
-            List<Dictionary<String, object>> boardObjects = new List<Dictionary<String, object>();
+            List<Dictionary<String, object>> boardObjects = new List<Dictionary<String, object>>();
             for (int i = 0; i < BoardConfig.height; i++)
             {
                 for (int j = 0; j < BoardConfig.width; j++)

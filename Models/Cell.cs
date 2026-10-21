@@ -22,6 +22,7 @@ namespace Models
 
         public Cell(Colony colony, double energy)
         {
+            age = 0;
             genePointer = 0;
             hp = GameConfig.maxHP;
 
@@ -47,19 +48,25 @@ namespace Models
 
         override public ActionType Step(CellViewObject cellViewObject)
         {
+            age++;
+            if (age == 1)
+            {
+                return ActionType.NONE;
+            }
+
             int curGene = colony.gene[genePointer];
             int curTrigger = colony.triggers[genePointer];
             bool isCondition = CheckCondition(cellViewObject, (CellCondition)curTrigger);
             if (isCondition)
             {
-                if (GameConfig.geneType == "Moving")
-                {
-                    genePointer = (genePointer + curGene) % GameConfig.geneSize;
-                }
-                else if (GameConfig.geneType == "Fixed")
+                if (GameConfig.geneType == "Fixed")
                 {
                     genePointer = curGene;
                 }
+                //if (GameConfig.geneType == "Moving")
+                //{
+                //    genePointer = (genePointer + curGene) % GameConfig.geneSize;
+                //}
                 else
                 {
                     throw new Exception("Ошибка: Неизвестный тип гена");
@@ -103,11 +110,11 @@ namespace Models
             }
             else if (cellCondition == CellCondition.IS_HIGHT_ENERGY)
             {
-                return hp >= GameConfig.maxHP * 0.75;
+                return energy >= GameConfig.generationEnergy * 0.75;
             }
             else if (cellCondition == CellCondition.IS_LOW_ENERGY)
             {
-                return hp <= GameConfig.maxHP * 0.25;
+                return energy <= GameConfig.generationEnergy * 0.25;
             }
             else
             {

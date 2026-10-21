@@ -4,7 +4,7 @@ using Utils;
 
 namespace Models
 {
-    class Tile
+    public class Tile
     {
         virtual public ActionType Step(CellViewObject cellViewObject)
         {
