@@ -6,15 +6,15 @@ namespace Models
 {
     class Tile
     {
-        public ActionType step(CellViewObject cellViewObject)
+        virtual public ActionType Step(CellViewObject cellViewObject)
         {
             return ActionType.NONE;
         }
-        public ActionType step()
+        virtual public ActionType Step()
         {
             return ActionType.NONE;
         }
-        public Dictionary<String, object> Serialize(int x, int y)
+        public Dictionary<String, object> Serialize(int y, int x)
         {
             throw new NotImplementedException();
         }

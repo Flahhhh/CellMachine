@@ -3,7 +3,7 @@ using Utils;
 
 namespace Models
 {
-    class Food
+    class Food: Tile
     {
         private double energy;
 
@@ -12,12 +12,12 @@ namespace Models
             this.energy = energy;
         }
 
-        public double getEnergy()
+        public double GetEnergy()
         {
             return energy;
         }
 
-        public ActionType step()
+        override public ActionType Step()
         {
             energy *= GameConfig.foodDecayingFactor;
             return ActionType.NONE;

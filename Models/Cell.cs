@@ -4,43 +4,52 @@ using Utils;
 
 namespace Models
 {
-    class Cell
+    class Cell: Tile
     {
         public int age;
         public double energy;
-        public int hp;
+        public double hp;
         public int colonyID;
         public int? ancestorColonyID;
         public Colony colony;
         private int genePointer;
-        private Orientation orientation;
+        public Orientation Orientation {get; set;}
+        public bool IsAlive {
+            get {
+                return hp > 0 && energy > 0;
+            }
+        }            
 
         public Cell(Colony colony, double energy)
         {
             genePointer = 0;
             hp = GameConfig.maxHP;
 
+            this.Orientation = Orientation.FORWARD;
             this.ancestorColonyID = colony.ancestorID;
             this.colonyID = colony.id;
             this.colony = colony;
             this.energy = energy;
         }
 
-        public bool isAlive()
+        public void DecreaseHp(double damage)
         {
-            return hp > 0 && energy > 0;
+            hp -= damage;
+        } 
+        public void IncreaseEnergy(double dEnergy)
+        {
+            energy = Math.Min(GameConfig.maxEnergy, energy+dEnergy);
+        }
+        public void DivideEnergy()
+        {
+            energy /= 2;
         }
 
-        public Orientation getOrientation()
-        {
-            return orientation;
-        }
-
-        public ActionType step(CellViewObject cellViewObject)
+        override public ActionType Step(CellViewObject cellViewObject)
         {
             int curGene = colony.gene[genePointer];
             int curTrigger = colony.triggers[genePointer];
-            bool isCondition = checkCondition(cellViewObject, (CellCondition)curTrigger);
+            bool isCondition = CheckCondition(cellViewObject, (CellCondition)curTrigger);
             if (isCondition)
             {
                 if (GameConfig.geneType == "Moving")
@@ -66,7 +75,7 @@ namespace Models
             }
         }
 
-        private bool checkCondition(CellViewObject cellViewObject, CellCondition cellCondition)
+        private bool CheckCondition(CellViewObject cellViewObject, CellCondition cellCondition)
         {
             if (cellCondition == CellCondition.IS_42)
             {

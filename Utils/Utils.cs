@@ -18,9 +18,30 @@ namespace Utils
     }
     public static class GeneticUtils
     {
-        public static Genome Mutation(int[] gene, int[] triggers, int seed = 42)
+        public static Genome Mutation(int geneSize, int triggersCount, int[] gene, int[] triggers, double mutationChance, int seed = 42)
         {
-            return ...
+            Random random = new Random(seed);
+
+            for (int i=0; i<geneSize; i++)
+            {
+                if (random.NextDouble() > mutationChance) continue;
+
+                switch (random.Next(3))
+                {
+                    case 0:
+                        //Gene Uniform
+                        gene[i] = (gene[i] + random.Next(0, geneSize)) % geneSize;
+                        break;
+                    case 1:
+                        //Gene Inversion
+                        gene[i] = geneSize - gene[i] - 1;
+                        break;
+                    case 2:
+                        //Trigger Modification
+                        triggers[i] = random.Next(triggersCount);
+                        break;
+                }
+            }
         }
 
         public static Genome GenerateRandomGene(int geneSize, int triggersCount, int seed = 42, string geneType = "Fixed")
@@ -52,7 +73,7 @@ namespace Utils
     }
     public static class SimUtils
     {
-        public static Pos getShift(Orientation orientation)
+        public static Pos GetShift(Orientation orientation)
         {
             Pos shift;
 
@@ -109,6 +130,7 @@ namespace Utils
         MOVE,
         LEFT,
         RIGHT,
+        DIVIDE,
     }
 
     public enum CellCondition

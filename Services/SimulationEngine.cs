@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 using Config;
 using Const;
@@ -11,8 +10,9 @@ namespace Services
     {
         private Tile[,] board = new Tile[BoardConfig.height, BoardConfig.width];
         private List<Colony> colonies = new List<Colony>();
+        private Random random = new Random(GameConfig.randomSeed);
 
-        public void init_board()
+        public void Init_board()
         {
             for (int i = 0; i < BoardConfig.height; i++)
             {
@@ -30,18 +30,19 @@ namespace Services
                 board[pos.x, pos.y] = new Cell(colony, GameConfig.generationEnergy);
             }
         }
-        public void run()
+        public void Run()
         {
+            Init_board();
             while (true)
             {
                 for (int i = 0; i < GameConfig.stepPeriod; i++)
                 {
-                    update();
+                    Update();
                 }
-                draw_state();
+                Draw_state();
             }
         }
-        public void update()
+        public void Update()
         {
             ActionType action;
             Tile tile, tile_;
@@ -55,14 +56,14 @@ namespace Services
                     tile = board[i, j];
                     if (tile is Cell)
                     {
-                        cell = tile as Cell;
-                        shift = SimUtils.getShift(cell.getOrientation());
-                        cellViewObject = getViewObject(i, j, shift);
+                        cell = (Cell)tile;
+                        shift = SimUtils.GetShift(cell.Orientation);
+                        cellViewObject = GetViewObject(i, j, shift);
 
-                        action = cell.step(cellViewObject);
-                        if (cell.isAlive())
+                        action = cell.Step(cellViewObject);
+                        if (cell.IsAlive)
                         {
-
+                            ApplyCellAction(i, j, action);
                         }
                         else
                         {
@@ -72,9 +73,9 @@ namespace Services
                     }
                     else
                     {
-                        tile.step();
+                        tile.Step();
 
-                        if (tile is Food && ((Food)tile).getEnergy() <= 0)
+                        if (tile is Food && ((Food)tile).GetEnergy() <= 0)
                         {
                             board[i, j] = new Tile();
                         }
@@ -83,7 +84,122 @@ namespace Services
             }
         }
 
-        public CellViewObject getViewObject(int x, int y, Pos shift)
+        public void ApplyCellAction(int y, int x, ActionType action)
+        {
+            Cell selectedCell = (Cell)board[y,x];
+            Tile? tile;
+            Pos shift;
+            switch (action)
+            {
+                case ActionType.ATTACK:
+                    shift = SimUtils.GetShift(selectedCell.Orientation);
+                    tile = GetViewTile(y, x, shift);
+                    if (tile is Cell)
+                    {
+                        ((Cell)tile).DecreaseHp(GameConfig.damage);
+                        if (!((Cell)tile).IsAlive)
+                        {
+                            board[y+shift.y, x+shift.x] = new Food(GameConfig.afterCellFoodAmount);
+                        }
+                    }
+
+                    break;
+                case ActionType.MOVE:
+                    shift = SimUtils.GetShift(selectedCell.Orientation);
+                    tile = GetViewTile(y, x, shift);
+                    if (tile == null || tile is Cell) break;
+                    
+                    if (tile is Food)
+                    {
+                        selectedCell.IncreaseEnergy(((Food)tile).GetEnergy());
+                    }
+                    board[y,x] = new Tile();
+                    board[y+shift.y, x+shift.x] = selectedCell;
+
+                    break;
+                case ActionType.LEFT:
+                    switch (selectedCell.Orientation)
+                    {
+                        case Orientation.FORWARD:
+                            selectedCell.Orientation = Orientation.LEFT;
+                            break;
+                        case Orientation.LEFT:
+                            selectedCell.Orientation = Orientation.BACKWARD;
+                            break;
+                        case Orientation.RIGHT:
+                            selectedCell.Orientation = Orientation.FORWARD;
+                            break;
+                        case Orientation.BACKWARD:
+                            selectedCell.Orientation = Orientation.RIGHT;
+                            break;
+                    }
+                    break;
+                case ActionType.RIGHT:
+                    switch (selectedCell.Orientation)
+                    {
+                        case Orientation.FORWARD:
+                            selectedCell.Orientation = Orientation.RIGHT;
+                            break;
+                        case Orientation.LEFT:
+                            selectedCell.Orientation = Orientation.FORWARD;
+                            break;
+                        case Orientation.RIGHT:
+                            selectedCell.Orientation = Orientation.BACKWARD;
+                            break;
+                        case Orientation.BACKWARD:
+                            selectedCell.Orientation = Orientation.LEFT;
+                            break;
+                    }
+                    break;
+                case ActionType.DIVIDE:
+                    Colony colony;
+                    Pos divPos = FindDivisionPose(y, x, selectedCell.Orientation);
+                    if (divPos.x == -1) break;
+                    
+                    if (random.NextDouble() > GameConfig.genomeMutationChance)
+                    {
+                        colony = selectedCell.colony;
+                    } else
+                    {
+                        colony = selectedCell.colony.GenerateNewColony();
+                    }
+
+                    selectedCell.DivideEnergy();
+                    board[divPos.y, divPos.x] = new Cell(colony, selectedCell.energy/2);
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public Pos FindDivisionPose(int y, int x, Orientation orientation)
+        {
+            Pos shift;
+            
+            for (int i=0; i<4; i++)
+            {
+                shift = SimUtils.GetShift((Orientation)(((int)orientation+i)%4));
+                if (BoardConfig.height>y && y>=0 && BoardConfig.width>x && x>=0 && !(board[y,x] is Cell))
+                {
+                    return new Pos {y=y+shift.y, x=x+shift.x};                    
+                }
+            }
+
+            return new Pos{x=-1, y=-1};
+        }
+
+        public Tile? GetViewTile(int y, int x, Pos shift)
+        {
+            if (y + shift.y < 0 || x + shift.x < 0 || y + shift.y >= BoardConfig.height || x + shift.x >= BoardConfig.width)
+            {
+                return null;
+            }
+
+            return board[y+shift.y, x+shift.x];
+        }
+
+        public CellViewObject GetViewObject(int y, int x, Pos shift)
         {
             CellViewObject cellViewObject;
             Tile tile;
@@ -119,23 +235,24 @@ namespace Services
             return cellViewObject;
         }
 
-        public void draw_state()
+        public void Draw_state()
         {
             Dictionary<String, object> simData = new Dictionary<string, object>();
             simData["height"] = BoardConfig.height;
             simData["width"] = BoardConfig.width;
 
-            simData["board"] = new List<Dictionary<String, object>>();
+            List<Dictionary<String, object>> boardObjects = new List<Dictionary<String, object>();
             for (int i = 0; i < BoardConfig.height; i++)
             {
                 for (int j = 0; j < BoardConfig.width; j++)
                 {
                     if (!(board[i, j] is Tile))
                     {
-                        simData["board"].Add(board[i, j].Serialize(j, i));
+                        boardObjects.Add(board[i,j].Serialize(i, j));
                     }
                 }
             }
+            simData["board"] = boardObjects;
         }
     }
 }

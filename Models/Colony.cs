@@ -36,7 +36,7 @@ namespace Models
 
         public Colony GenerateNewColony()
         {
-            Genome newGenome = GeneticUtils.Mutation(gene, triggers, GameConfig.randomSeed);
+            Genome newGenome = GeneticUtils.Mutation(GameConfig.geneSize, GameConfig.triggersCount, gene, triggers, GameConfig.randomSeed);
             Color newColor = SelectNewColor();
             int newAncestorID;
 
@@ -54,7 +54,12 @@ namespace Models
 
         public Color SelectNewColor()
         {
-            return ...
+            Random random = new Random(GameConfig.randomSeed);
+            return Color.FromArgb(
+                Math.Max(0, Math.Min(255, color.R + random.Next(-25, 25))), 
+                Math.Max(0, Math.Min(255, color.G + random.Next(-25, 25))), 
+                Math.Max(0, Math.Min(255, color.B + random.Next(-25, 25)))
+            );
         }
     }
 }
