@@ -1,5 +1,7 @@
-using System.Drawing;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Config;
+using Const;
 using Utils;
 
 namespace Models
@@ -28,15 +30,15 @@ namespace Models
             this.color = color;
         }
         public Colony(Color color, int? ancestorID = null) : this(
-            GeneticUtils.GenerateRandomGene(GameConfig.geneSize, GameConfig.triggersCount, GameConfig.randomSeed),
+            GeneticUtils.GenerateRandomGene(GameConfig.geneSize, GameConfig.triggersCount, GameConfig.geneType),
             color,
             ancestorID)
         { }
-        public Colony() : this(GeneralUtils.GenerateRandomColor(GameConfig.randomSeed)) { }
+        public Colony() : this(GeneralUtils.GenerateRandomColor()) { }
 
         public Colony GenerateNewColony()
         {
-            Genome newGenome = GeneticUtils.Mutation(GameConfig.geneSize, GameConfig.triggersCount, gene, triggers, GameConfig.genomeMutationChance, GameConfig.randomSeed);
+            Genome newGenome = GeneticUtils.Mutation(GameConfig.geneSize, GameConfig.triggersCount, gene, triggers, GameConfig.geneMutationChance);
             Color newColor = SelectNewColor();
             int newAncestorID;
 
@@ -54,11 +56,11 @@ namespace Models
 
         public Color SelectNewColor()
         {
-            Random random = new Random(GameConfig.randomSeed);
-            return Color.FromArgb(
-                Math.Max(0, Math.Min(255, color.R + random.Next(-25, 25))), 
-                Math.Max(0, Math.Min(255, color.G + random.Next(-25, 25))), 
-                Math.Max(0, Math.Min(255, color.B + random.Next(-25, 25)))
+            Rgba32 currentRgba = color.ToPixel<Rgba32>();
+            return Color.FromRgb(
+                (byte)Math.Max(20, Math.Min(255, currentRgba.R + Constants.random.Next(-25, 25))), 
+                0,//(byte)Math.Max(20, Math.Min(255, currentRgba.G + Constants.random.Next(-25, 25))), 
+                (byte)Math.Max(0, Math.Min(255, currentRgba.B + Constants.random.Next(-25, 25)))
             );
         }
     }

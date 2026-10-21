@@ -37,6 +37,10 @@ namespace Models
         {
             hp -= damage;
         } 
+        public void DecreaseEnergy(double cost)
+        {
+            energy -= cost;
+        } 
         public void IncreaseEnergy(double dEnergy)
         {
             energy = Math.Min(GameConfig.maxEnergy, energy+dEnergy);
@@ -54,6 +58,7 @@ namespace Models
                 return ActionType.NONE;
             }
 
+            energy -= maxLiveEnergyCost*(1/age);
             int curGene = colony.gene[genePointer];
             int curTrigger = colony.triggers[genePointer];
             bool isCondition = CheckCondition(cellViewObject, (CellCondition)curTrigger);
@@ -115,6 +120,14 @@ namespace Models
             else if (cellCondition == CellCondition.IS_LOW_ENERGY)
             {
                 return energy <= GameConfig.generationEnergy * 0.25;
+            }
+            else if (cellCondition == CellCondition.IS_HIGHT_HP)
+            {
+                return hp >= GameConfig.maxHP * 0.75;
+            }
+            else if (cellCondition == CellCondition.IS_LOW_HP)
+            {
+                return hp <= GameConfig.maxHP * 0.25;
             }
             else
             {

@@ -14,6 +14,9 @@ namespace Config
         public static double maxHP;
         public static double damage;
         public static double maxEnergy;
+        public static double maxLiveEnergyCost;
+        public static double attackEnergyCost;
+        public static double moveEnergyCost;
         public static double generationEnergy;
         public static double cellHealFactor;
         public static double cellEnergyDecayingFactor;

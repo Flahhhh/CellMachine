@@ -1,4 +1,7 @@
 using System.Text.Json.Serialization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+
 using Config;
 using Const;
 using Models;
@@ -63,6 +66,10 @@ namespace Services
                         if (cell.IsAlive)
                         {
                             ApplyCellAction(i, j, action);
+                            if (!cell.IsAlive)
+                            {
+                                board[i, j] = new Food(GameConfig.afterCellFoodAmount);
+                            }
                         }
                         else
                         {
@@ -91,6 +98,7 @@ namespace Services
             switch (action)
             {
                 case ActionType.ATTACK:
+                    selectedCell.DecreaseEnergy(GameConfig.attackEnergyCost);
                     shift = SimUtils.GetShift(selectedCell.Orientation);
                     tile = GetViewTile(y, x, shift);
                     if (tile is Cell)
@@ -104,6 +112,7 @@ namespace Services
 
                     break;
                 case ActionType.MOVE:
+                    selectedCell.DecreaseEnergy(GameConfig.moveEnergyCost);
                     shift = SimUtils.GetShift(selectedCell.Orientation);
                     tile = GetViewTile(y, x, shift);
                     if (tile == null || tile is Cell) break;
@@ -237,6 +246,34 @@ namespace Services
         }
 
         public void Draw_state()
+        {
+            using (Image<Rgba32> image = new Image<Rgba32>(100, 100))
+            {
+                image.ProcessPixelRows(accessor =>
+                {
+                    for (int x=0; x<BoardConfig.width; x++)
+                    {
+                        Span<Rgba32> pixelRow = accessor.GetRowSpan(x);
+                        for (int y=0; y<BoardConfig.height; y++)
+                        {
+                            Tile tile = board[y, x];
+                            if (tile is Food)
+                            {
+                                pixelRow[y] = Color.Green;   
+                            } else if (tile is Cell)
+                            {
+                                Color color = ((Cell)tile).colony.color;
+                                pixelRow[y] = color;
+                            }
+                        }
+                    }
+                    
+                });
+
+                image.SaveAsPng("pixel_imagesharp.png");
+            }
+        }
+        public void GenerateJSONState()
         {
             Dictionary<String, object> simData = new Dictionary<string, object>();
             simData["height"] = BoardConfig.height;

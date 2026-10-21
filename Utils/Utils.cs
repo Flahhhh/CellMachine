@@ -1,4 +1,5 @@
-using System.Drawing;
+
+using SixLabors.ImageSharp;
 using System.Dynamic;
 using Const;
 using Models;
@@ -9,10 +10,10 @@ namespace Utils
     {
         public static Color GenerateRandomColor()
         {
-            return Color.FromArgb(
-                Constants.random.Next(256),
-                Constants.random.Next(256),
-                Constants.random.Next(256)
+            return Color.FromRgb(
+                (byte)Constants.random.Next(20, 256),
+                0,//(byte)Constants.random.Next(20,256),
+                (byte)Constants.random.Next(20,256)
             );
         }
     }
