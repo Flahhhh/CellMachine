@@ -4,7 +4,8 @@ using Utils;
 
 namespace Models
 {
-    class Cell {
+    class Cell
+    {
         public int age;
         public double energy;
         public int hp;
@@ -17,7 +18,7 @@ namespace Models
         public Cell(Colony colony, double energy)
         {
             genePointer = 0;
-            hp = Settings.gameConfig.maxHP;
+            hp = GameConfig.maxHP;
 
             this.ancestorColonyID = colony.ancestorID;
             this.colonyID = colony.id;
@@ -30,7 +31,7 @@ namespace Models
             return hp > 0 && energy > 0;
         }
 
-        override public Orientation getOrientation()
+        public Orientation getOrientation()
         {
             return orientation;
         }
@@ -42,22 +43,25 @@ namespace Models
             bool isCondition = checkCondition(cellViewObject, (CellCondition)curTrigger);
             if (isCondition)
             {
-                if (Settings.gameConfig.geneType == "Shift")
+                if (GameConfig.geneType == "Moving")
                 {
-                    genePointer = (genePointer + curGene) % Settings.gameConfig.geneSize;
-                } else if(Settings.gameConfig.geneType == "Fixed")
+                    genePointer = (genePointer + curGene) % GameConfig.geneSize;
+                }
+                else if (GameConfig.geneType == "Fixed")
                 {
                     genePointer = curGene;
-                } else
+                }
+                else
                 {
-                    throw new ValueError();
+                    throw new Exception("Ошибка: Неизвестный тип гена");
                 }
 
-                ActionType actionType = (ActionType)(genePointer % Settings.gameConfig.actionSpace);   
+                ActionType actionType = (ActionType)(genePointer % GameConfig.actionSpace);
                 return actionType;
-            } else
+            }
+            else
             {
-                genePointer = (genePointer+1) % Settings.gameConfig.geneSize;
+                genePointer = (genePointer + 1) % GameConfig.geneSize;
                 return ActionType.NONE;
             }
         }
@@ -71,24 +75,34 @@ namespace Models
             else if (cellCondition == CellCondition.IS_NONE)
             {
                 return cellViewObject == CellViewObject.NONE;
-            } else if (cellCondition == CellCondition.IS_WALL)
+            }
+            else if (cellCondition == CellCondition.IS_WALL)
             {
                 return cellViewObject == CellViewObject.WALL;
-            } else if(cellCondition == CellCondition.IS_ENEMY)
+            }
+            else if (cellCondition == CellCondition.IS_ENEMY)
             {
                 return cellViewObject == CellViewObject.ENEMY;
-            } else if(cellCondition == CellCondition.IS_ALLIE)
+            }
+            else if (cellCondition == CellCondition.IS_ALLIE)
             {
                 return cellViewObject == CellViewObject.ALLIE;
-            } else if(cellCondition == CellCondition.IS_FOOD)
+            }
+            else if (cellCondition == CellCondition.IS_FOOD)
             {
                 return cellViewObject == CellViewObject.FOOD;
-            } else if(cellCondition == CellCondition.IS_HIGHT_ENERGY)
+            }
+            else if (cellCondition == CellCondition.IS_HIGHT_ENERGY)
             {
-                return hp >= Settings.gameConfig.maxHP*0.75;
-            } else if(cellCondition == CellCondition.IS_LOW_ENERGY)
+                return hp >= GameConfig.maxHP * 0.75;
+            }
+            else if (cellCondition == CellCondition.IS_LOW_ENERGY)
             {
-                return hp <= Settings.gameConfig.maxHP*0.25;
+                return hp <= GameConfig.maxHP * 0.25;
+            }
+            else
+            {
+                return true;
             }
         }
     }

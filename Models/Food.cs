@@ -1,6 +1,5 @@
 using Config;
 using Utils;
-using Const;
 
 namespace Models
 {
@@ -20,7 +19,7 @@ namespace Models
 
         public ActionType step()
         {
-            energy *= Settings.gameConfig.foodDecayingFactor;
+            energy *= GameConfig.foodDecayingFactor;
             return ActionType.NONE;
         }
 

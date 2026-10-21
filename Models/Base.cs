@@ -14,6 +14,10 @@ namespace Models
         {
             return ActionType.NONE;
         }
-        public Tile() {}
+        public Dictionary<String, object> Serialize(int x, int y)
+        {
+            throw new NotImplementedException();
+        }
+        public Tile() { }
     }
 }

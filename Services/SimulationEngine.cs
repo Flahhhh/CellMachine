@@ -1,3 +1,6 @@
+using System.Security.Cryptography.X509Certificates;
+using System.Text.Json.Serialization;
+using Config;
 using Const;
 using Models;
 using Utils;
@@ -6,17 +9,32 @@ namespace Services
 {
     public class SimulationEngine
     {
-        private Tile[,] board = new Tile[Settings.boardConfig.height, Settings.boardConfig.width];
-        
+        private Tile[,] board = new Tile[BoardConfig.height, BoardConfig.width];
+        private List<Colony> colonies = new List<Colony>();
+
         public void init_board()
         {
-            
+            for (int i = 0; i < BoardConfig.height; i++)
+            {
+                for (int j = 0; j < BoardConfig.width; j++)
+                {
+                    board[i, j] = new Tile();
+                }
+            }
+
+            foreach (Pos pos in SimUtils.GenerateUniquePoses(GameConfig.initColoniesCount, BoardConfig.height, BoardConfig.width, GameConfig.randomSeed))
+            {
+                Colony colony = new Colony();
+                colonies.Add(colony);
+
+                board[pos.x, pos.y] = new Cell(colony, GameConfig.generationEnergy);
+            }
         }
         public void run()
         {
             while (true)
             {
-                for (int i=0; i<Settings.gameConfig.stepPeriod; i++)
+                for (int i = 0; i < GameConfig.stepPeriod; i++)
                 {
                     update();
                 }
@@ -30,11 +48,11 @@ namespace Services
             Cell cell;
             CellViewObject cellViewObject;
             Pos shift;
-            for (int i=0; i<Settings.boardConfig.height; i++)
+            for (int i = 0; i < BoardConfig.height; i++)
             {
-                for (int j=0; j<Settings.boardConfig.width; j++)
+                for (int j = 0; j < BoardConfig.width; j++)
                 {
-                    tile = board[i,j];
+                    tile = board[i, j];
                     if (tile is Cell)
                     {
                         cell = tile as Cell;
@@ -44,22 +62,24 @@ namespace Services
                         action = cell.step(cellViewObject);
                         if (cell.isAlive())
                         {
-                            
-                        } else
+
+                        }
+                        else
                         {
-                            board[i,j] = new Food(Settings.gameConfig.afterCellFoodAmount);
+                            board[i, j] = new Food(GameConfig.afterCellFoodAmount);
                         }
 
-                    } else
+                    }
+                    else
                     {
                         tile.step();
 
                         if (tile is Food && ((Food)tile).getEnergy() <= 0)
                         {
-                            board[i,j] = new Tile();
+                            board[i, j] = new Tile();
                         }
-                    }        
-                } 
+                    }
+                }
             }
         }
 
@@ -68,25 +88,29 @@ namespace Services
             CellViewObject cellViewObject;
             Tile tile;
 
-            if (y+shift.y < 0 || x+shift.x < 0 || y+shift.y >= Settings.boardConfig.height || x+shift.x >= Settings.boardConfig.width)
+            if (y + shift.y < 0 || x + shift.x < 0 || y + shift.y >= BoardConfig.height || x + shift.x >= BoardConfig.width)
             {
                 cellViewObject = CellViewObject.WALL;
-            } else
+            }
+            else
             {
-                tile = board[y+shift.y, x+shift.x];
+                tile = board[y + shift.y, x + shift.x];
                 if (tile is Food)
                 {
                     cellViewObject = CellViewObject.FOOD;
-                } else if(tile is Cell)
+                }
+                else if (tile is Cell)
                 {
                     if (((Cell)tile).colonyID == ((Cell)tile).colonyID)
                     {
                         cellViewObject = CellViewObject.ALLIE;
-                    } else
-                {
+                    }
+                    else
+                    {
                         cellViewObject = CellViewObject.ENEMY;
+                    }
                 }
-                } else
+                else
                 {
                     cellViewObject = CellViewObject.NONE;
                 }
@@ -97,7 +121,21 @@ namespace Services
 
         public void draw_state()
         {
-            
+            Dictionary<String, object> simData = new Dictionary<string, object>();
+            simData["height"] = BoardConfig.height;
+            simData["width"] = BoardConfig.width;
+
+            simData["board"] = new List<Dictionary<String, object>>();
+            for (int i = 0; i < BoardConfig.height; i++)
+            {
+                for (int j = 0; j < BoardConfig.width; j++)
+                {
+                    if (!(board[i, j] is Tile))
+                    {
+                        simData["board"].Add(board[i, j].Serialize(j, i));
+                    }
+                }
+            }
         }
     }
 }

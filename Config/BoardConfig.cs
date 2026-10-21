@@ -1,7 +1,8 @@
 namespace Config
 {
-    public record class BoardConfig {
-        public int height;
-        public int width;
+    public static class BoardConfig
+    {
+        public static int height;
+        public static int width;
     }
 }

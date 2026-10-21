@@ -1,15 +1,19 @@
 namespace Config
 {
-    public record class GameConfig
+    public static class GameConfig
     {
-        public string geneType = "Shift"; // Shift || Fixed
-        public int actionSpace;
-        public int stepPeriod;
-        public int geneSize;
-        public int maxHP;
-        public double cellHealFactor;
-        public double cellEnergyDecayingFactor;
-        public double afterCellFoodAmount;
-        public double foodDecayingFactor;
+        public static int randomSeed = 42;
+        public static string geneType = "Fixed"; // Moving || Fixed
+        public static int actionSpace;
+        public static int stepPeriod;
+        public static int geneSize;
+        public static int triggersCount;
+        public static int initColoniesCount;
+        public static int maxHP;
+        public static double generationEnergy;
+        public static double cellHealFactor;
+        public static double cellEnergyDecayingFactor;
+        public static double afterCellFoodAmount;
+        public static double foodDecayingFactor;
     }
 }
