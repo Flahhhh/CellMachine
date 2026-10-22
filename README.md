@@ -12,15 +12,17 @@
 |**2**|**0.005**|<video src="https://github.com/user-attachments/assets/fb05ff5c-46a2-46cf-9655-04207d10a304" autoplay loop muted playsinline width="100%"></video>|
 ---
 ### Mathematical Formulation
-At any given simulation tick t, the cell's state is defined by the pointer \(P_t \in [0, N-1]\), where N is the `geneSize`. The genome consists of two arrays of size N:
+At any given simulation tick t, the cell's state is defined by the pointer $P_t \in [0, N-1]$, where N is the `geneSize`. The genome consists of two arrays of size N:
 *   Gene G: Array of target pointer addresses.
 *   Trigger T: Array of environmental conditions.
 
-The transition function for the pointer \(P_{t+1}\) and the resulting action \(A_t\) are defined as:
+The transition function for the pointer $P_{t+1}$ and the resulting action $A_t$ are defined as:
 
-\[P_{t+1} = \begin{cases} G[P_t], & \text{if } \text{Condition}(T[P_t]) \text{ is True} \\ (P_t + 1) \pmod N, & \text{if } \text{Condition}(T[P_t]) \text{ is False} \end{cases}\]
+$$
+P_{t+1} = \begin{cases} G[P_t], & \text{if } \text{Condition}(T[P_t]) \text{ is True} \\ (P_t + 1) \pmod N, & \text{if } \text{Condition}(T[P_t]) \text{ is False} \end{cases}
+$$
 
-\[A_t = P_{t+1} \pmod{\text{actionSpace}}\]
+$$A_t = P_{t+1} \pmod{\text{actionSpace}}$$
 ---
 ## Technologies
 * **C#** (.NET core)
