@@ -1,6 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Text.Json.Serialization;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing.Processing;
 
 using Config;
 using Const;
@@ -11,8 +17,10 @@ namespace Services
 {
     public class SimulationEngine
     {
+        private int time = 0;
         private Tile[,] board = new Tile[BoardConfig.height, BoardConfig.width];
         private List<Colony> colonies = new List<Colony>();
+
 
         public void Init_board()
         {
@@ -29,20 +37,29 @@ namespace Services
                 Colony colony = new Colony();
                 colonies.Add(colony);
 
-                board[pos.x, pos.y] = new Cell(colony, GameConfig.generationEnergy);
+                board[pos.y, pos.x] = new Cell(colony, GameConfig.generationEnergy);
             }
         }
+
+
+
         public void Run()
         {
+            Constants.videoRecorder.InitVideoRecorder();
             Init_board();
-            while (true)
+            while (time < 1000)
             {
                 for (int i = 0; i < GameConfig.stepPeriod; i++)
                 {
                     Update();
                 }
+                time++;
                 Draw_state();
+
+                Console.WriteLine(time);
             }
+
+            Constants.videoRecorder.CloseVideoRecorder();
         }
         public void Update()
         {
@@ -84,6 +101,9 @@ namespace Services
                         if (tile is Food && ((Food)tile).GetEnergy() <= 0)
                         {
                             board[i, j] = new Tile();
+                        } else if (Constants.random.NextDouble() <= GameConfig.foodSpawnChance)
+                        {
+                            board[i, j] = new Food(GameConfig.foodSpawnEnergyAmount);
                         }
                     }
                 }
@@ -247,31 +267,51 @@ namespace Services
 
         public void Draw_state()
         {
-            using (Image<Rgba32> image = new Image<Rgba32>(100, 100))
+            if (Constants.videoRecorder.CheckStatus()) return;
+
+            int videoWidth = BoardConfig.width * VideoConfig.cellSize;
+            int videoHeight = BoardConfig.height * VideoConfig.cellSize;
+
+            using (Image<Rgb24> frameImage = new Image<Rgb24>(videoWidth, videoHeight))
             {
-                image.ProcessPixelRows(accessor =>
+                frameImage.Mutate(ctx =>
                 {
-                    for (int x=0; x<BoardConfig.width; x++)
+                    ctx.Clear(Color.Black);
+
+                    for (int y = 0; y < BoardConfig.height; y++)
                     {
-                        Span<Rgba32> pixelRow = accessor.GetRowSpan(x);
-                        for (int y=0; y<BoardConfig.height; y++)
+                        for (int x = 0; x < BoardConfig.width; x++)
                         {
                             Tile tile = board[y, x];
-                            if (tile is Food)
+                            Color cellColor = Color.Black;
+
+                            if (tile is Cell cell)
                             {
-                                pixelRow[y] = Color.Green;   
-                            } else if (tile is Cell)
+                                int hash = cell.colony.GetHashCode();
+                                cellColor = Color.FromRgb((byte)(hash & 0xFF), (byte)((hash >> 8) & 0xFF), (byte)((hash >> 16) & 0xFF));
+                            }
+                            else if (tile is Food)
                             {
-                                Color color = ((Cell)tile).colony.color;
-                                pixelRow[y] = color;
+                                cellColor = Color.Green;
+                            }
+                            else if (tile is Tile)
+                            {
+                                continue;
+                            }
+
+                            if (cellColor != Color.Black)
+                            {
+                                var rect = new RectangleF(x * VideoConfig.cellSize, y * VideoConfig.cellSize, VideoConfig.cellSize, VideoConfig.cellSize);
+                                ctx.Fill(cellColor, rect);
                             }
                         }
                     }
-                    
                 });
 
-                image.SaveAsPng("pixel_imagesharp.png");
+                Constants.videoRecorder.CopyToBuffer(frameImage);
             }
+
+            Constants.videoRecorder.SaveBuffer();
         }
         public void GenerateJSONState()
         {

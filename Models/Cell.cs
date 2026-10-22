@@ -58,7 +58,7 @@ namespace Models
                 return ActionType.NONE;
             }
 
-            energy -= maxLiveEnergyCost*(1/age);
+            energy -= GameConfig.maxLiveEnergyCost*(1-1/age);
             int curGene = colony.gene[genePointer];
             int curTrigger = colony.triggers[genePointer];
             bool isCondition = CheckCondition(cellViewObject, (CellCondition)curTrigger);

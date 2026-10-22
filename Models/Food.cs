@@ -19,7 +19,7 @@ namespace Models
 
         override public ActionType Step()
         {
-            energy *= GameConfig.foodDecayingFactor;
+            energy -= GameConfig.foodSpawnEnergyAmount * GameConfig.foodDecayingFactor;
             return ActionType.NONE;
         }
 
