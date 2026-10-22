@@ -19,7 +19,7 @@ At any given simulation tick t, the cell's state is defined by the pointer $P_t 
 The transition function for the pointer $P_{t+1}$ and the resulting action $A_t$ are defined as:
 
 $$
-P_{t+1} = \begin{cases} G[P_t], & \text{if } \text{Condition}(T[P_t]) \text{ is True} \\ (P_t + 1) \pmod N, & \text{if } \text{Condition}(T[P_t]) \text{ is False} \end{cases}
+P_{t+1} = \begin{cases} G[P_t], & \text{if Condition}(T[P_t]) \text{ is True} \\\\ (P_t + 1) \pmod N, & \text{if Condition}(T[P_t]) \text{ is False} \end{cases}
 $$
 
 $$A_t = P_{t+1} \pmod{\text{actionSpace}}$$
