@@ -4,6 +4,7 @@
 This repository contains C# biological cell evolution simulator. There are used Pointer genome algorithm for cell decision process. 
 ---
 ## Demo
+![Simulation state example](https://github.com/user-attachments/assets/9f945453-c2e5-48d2-bae4-1698e9787d6a)
 |№|genomeMutationChance|Video|
 |---|---|---|
 |**1**|**0.05**|<video src="https://github.com/user-attachments/assets/8dc75f02-9227-4513-a646-f970cc0435a9" autoplay loop muted playsinline width="100%"></video>|
