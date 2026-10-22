@@ -1,7 +1,8 @@
 # Cell Machine simulator
-## Overview
 ---
-This repository contains C# biological cell evolution simulator. There are used Pointer genome algorithm for cell decision process. 
+## Overview
+<p>This repository contains C# biological cell evolution simulator. There are used Pointer genome algorithm for cell decision process. </p>
+
 ---
 ## Demo
 ![Simulation state example](https://github.com/user-attachments/assets/9f945453-c2e5-48d2-bae4-1698e9787d6a)
@@ -68,9 +69,6 @@ dotnet restore
 ```bash
 dotnet run
 ``` 
----
-## References
-
 ---
 ## License
 MIT License
