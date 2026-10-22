@@ -18,11 +18,12 @@ At any given simulation tick t, the cell's state is defined by the pointer $P_t 
 
 The transition function for the pointer $P_{t+1}$ and the resulting action $A_t$ are defined as:
 
-$$
+<p>$$
 P_{t+1} = \begin{cases} G[P_t], & \text{if Condition}(T[P_t]) \text{ is True} \\\\ (P_t + 1) \pmod N, & \text{if Condition}(T[P_t]) \text{ is False} \end{cases}
-$$
+$$</p>
 
-$$A_t = P_{t+1} \pmod{\text{actionSpace}}$$
+<p>$$A_t = P_{t+1} \pmod{\text{actionSpace}}$$</p>
+
 ---
 ## Technologies
 * **C#** (.NET core)
