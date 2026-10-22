@@ -47,7 +47,7 @@ namespace Services
         {
             Constants.videoRecorder.InitVideoRecorder();
             Init_board();
-            while (time < 1000)
+            while (time < 350)
             {
                 for (int i = 0; i < GameConfig.stepPeriod; i++)
                 {
