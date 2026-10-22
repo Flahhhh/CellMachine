@@ -1,4 +1,2 @@
-[![Смотреть видео](https://youtube.com)](https://youtu.be/XpgtMihrYu8)
-<a href="https://youtu.be/XpgtMihrYu8" target="_blank">
-  <img src="https://youtube.com" alt="C# CellMachine demo2 video" width="500" />
-</a>
+[![Смотреть видео](https://youtube.com)](https://youtu.be/XpgtMihrYu8?si=OJ4zZZIdHBP4N58l)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/XpgtMihrYu8?si=nvpNC83jFED_uOWR" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
