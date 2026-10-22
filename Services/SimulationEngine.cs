@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text.Json.Serialization;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -47,7 +42,7 @@ namespace Services
         {
             Constants.videoRecorder.InitVideoRecorder();
             Init_board();
-            while (time < 350)
+            while (time < 300)
             {
                 for (int i = 0; i < GameConfig.stepPeriod; i++)
                 {
@@ -308,6 +303,7 @@ namespace Services
                     }
                 });
 
+                //frameImage.Save("image.png");
                 Constants.videoRecorder.CopyToBuffer(frameImage);
             }
 
