@@ -229,8 +229,10 @@ namespace Services
                     selectedCell.DivideEnergy();
 
                     break;
-                case ActionType.NONE:
+                case ActionType.HEAL:
                     selectedCell.Heal();
+                    break;
+                case ActionType.NONE:
                     break;
             }
         }

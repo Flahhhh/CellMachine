@@ -39,7 +39,8 @@ namespace Models
         } 
         public void Heal()
         {
-            hp += Math.Min(GameConfig.maxHP, GameConfig.cellHealFactor * GameConfig.maxHP);
+            energy -= GameConfig.healEnergyCost;
+            hp = Math.Min(GameConfig.maxHP, hp+GameConfig.cellHealFactor * GameConfig.maxHP);
         }
         public void DecreaseEnergy(double cost)
         {
