@@ -7,17 +7,25 @@ using Config;
 using Const;
 using Models;
 using Utils;
+using System.Text.Json;
 
 namespace Services
 {
     public class SimulationEngine
     {
         private int time = 0;
+        private string logDir=DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         private Tile[,] board = new Tile[BoardConfig.height, BoardConfig.width];
         private List<Colony> colonies = new List<Colony>();
 
+        public void InitDirs()
+        {
+            if(!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
+            if (!Directory.Exists($"Logs/{logDir}")) Directory.CreateDirectory($"Logs/{logDir}");
+            if(!Directory.Exists("Videos")) Directory.CreateDirectory("Videos");
+        }
 
-        public void Init_board()
+        public void InitBoard()
         {
             for (int i = 0; i < BoardConfig.height; i++)
             {
@@ -40,29 +48,41 @@ namespace Services
 
         public void Run()
         {
+            InitDirs();
+            InitBoard();
             Constants.videoRecorder.InitVideoRecorder();
-            Init_board();
-            while (time < 300)
+
+            while (time < GameConfig.simIterations)
             {
+                bool status = true;
                 for (int i = 0; i < GameConfig.stepPeriod; i++)
                 {
-                    Update();
+                    status = Update() != 0;
                 }
                 time++;
                 Draw_state();
 
+                if (time % GameConfig.saveFreq == 0)
+                {
+                    CreateLogDir();
+                    SaveJSONState();
+                    SaveConfig();
+                }
+
+                if (!status) break;
                 Console.WriteLine(time);
             }
 
             Constants.videoRecorder.CloseVideoRecorder();
         }
-        public void Update()
+        public int Update()
         {
             ActionType action;
             Tile tile, tile_;
             Cell cell;
             CellViewObject cellViewObject;
             Pos shift;
+            int cellSteps=0;
             for (int i = 0; i < BoardConfig.height; i++)
             {
                 for (int j = 0; j < BoardConfig.width; j++)
@@ -73,19 +93,26 @@ namespace Services
                         cell = (Cell)tile;
                         shift = SimUtils.GetShift(cell.Orientation);
                         cellViewObject = GetViewObject(i, j, shift);
-
+    
                         action = cell.Step(cellViewObject);
                         if (cell.IsAlive)
                         {
+                            cellSteps++;
                             ApplyCellAction(i, j, action);
                             if (!cell.IsAlive)
                             {
-                                board[i, j] = new Food(GameConfig.afterCellFoodAmount);
+                                cell.colony.localRelatives--;
+                                //if (cell.colony.ancestorID != null) cell.colony.ancestor!.globalRelatives--;
+                                if (cell.energy > 0) board[i, j] = new Food(cell.energy);
+                                else board[i, j] = new Tile();
                             }
                         }
                         else
                         {
-                            board[i, j] = new Food(GameConfig.afterCellFoodAmount);
+                            cell.colony.localRelatives--;
+                            //if (cell.colony.ancestorID != null) cell.colony.ancestor!.globalRelatives--;
+                            if (cell.energy > 0) board[i, j] = new Food(cell.energy);
+                            else board[i, j] = new Tile();
                         }
 
                     }
@@ -103,6 +130,8 @@ namespace Services
                     }
                 }
             }
+
+            return cellSteps;
         }
 
         public void ApplyCellAction(int y, int x, ActionType action)
@@ -110,6 +139,7 @@ namespace Services
             Cell selectedCell = (Cell)board[y,x];
             Tile? tile;
             Pos shift;
+            //selectedCell.DecreaseEnergy((1-(1/selectedCell.age))*GameConfig.maxLiveEnergyCost);
             switch (action)
             {
                 case ActionType.ATTACK:
@@ -118,10 +148,14 @@ namespace Services
                     tile = GetViewTile(y, x, shift);
                     if (tile is Cell)
                     {
-                        ((Cell)tile).DecreaseHp(GameConfig.damage);
-                        if (!((Cell)tile).IsAlive)
+                        Cell attackedCell = (Cell)tile;
+                        attackedCell.DecreaseHp(GameConfig.damage);
+                        if (!attackedCell.IsAlive)
                         {
-                            board[y+shift.y, x+shift.x] = new Food(GameConfig.afterCellFoodAmount);
+                            attackedCell.colony.localRelatives--;
+                            //if (attackedCell.colony.ancestorID != null) attackedCell.colony.ancestor!.globalRelatives--;
+                            if (attackedCell.energy > 0) board[y+shift.y, x+shift.x] = new Food(attackedCell.energy);
+                            else board[y, x] = new Tile();
                         }
                     }
 
@@ -185,13 +219,18 @@ namespace Services
                     } else
                     {
                         colony = selectedCell.colony.GenerateNewColony();
+                        colonies.Add(colony);
                     }
+                    
+                    colony.localRelatives++;
+                    //if (colony.ancestorID != null) colony.ancestor!.globalRelatives++;
 
                     board[divPos.y, divPos.x] = new Cell(colony, selectedCell.energy/2);
                     selectedCell.DivideEnergy();
 
                     break;
-                default:
+                case ActionType.NONE:
+                    selectedCell.Heal();
                     break;
             }
         }
@@ -309,8 +348,17 @@ namespace Services
 
             Constants.videoRecorder.SaveBuffer();
         }
-        public void GenerateJSONState()
+        public void CreateLogDir()
         {
+            Directory.CreateDirectory($"Logs/{logDir}/Evolution_{time}");
+        }
+        public void SaveJSONState()
+        {
+            var options = new JsonSerializerOptions 
+            { 
+                WriteIndented = true 
+            };
+            
             Dictionary<String, object> simData = new Dictionary<string, object>();
             simData["height"] = BoardConfig.height;
             simData["width"] = BoardConfig.width;
@@ -320,13 +368,28 @@ namespace Services
             {
                 for (int j = 0; j < BoardConfig.width; j++)
                 {
-                    if (!(board[i, j] is Tile))
+                    if (board[i, j] is Cell || board[i, j] is Food)
                     {
-                        boardObjects.Add(board[i,j].Serialize(i, j));
+                        boardObjects.Add(board[i,j].ToJson(i, j));
                     }
                 }
             }
             simData["board"] = boardObjects;
+
+            List<Dictionary<String, object>> simColonies = new List<Dictionary<String, object>>();
+            foreach (var colony in colonies)
+            {
+                if (colony.IsAlive) simColonies.Add(colony.ToJson());
+            }
+            simData["colonies"] = simColonies;
+
+            File.WriteAllText($"Logs/{logDir}/Evolution_{time}/board_{time}.json", JsonSerializer.Serialize(simData));
+            //File.WriteAllText($"Logs/{logDir}/Evolution_{time}/board_{time}.json", JsonSerializer.Serialize(simData, options));
+        }
+
+        public void SaveConfig()
+        {
+            
         }
     }
 }

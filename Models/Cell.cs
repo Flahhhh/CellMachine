@@ -37,6 +37,10 @@ namespace Models
         {
             hp -= damage;
         } 
+        public void Heal()
+        {
+            hp += Math.Min(GameConfig.maxHP, GameConfig.cellHealFactor * GameConfig.maxHP);
+        }
         public void DecreaseEnergy(double cost)
         {
             energy -= cost;
@@ -133,6 +137,20 @@ namespace Models
             {
                 return true;
             }
+        }
+
+        public override Dictionary<string, object> ToJson(int y, int x)
+        {
+            Dictionary<String, object> toSave = new Dictionary<string, object>();
+            toSave["type"] = "Cell";
+            toSave["colony_id"] = colonyID;
+            toSave["age"] = age;
+            toSave["pointer"] = genePointer;
+            toSave["hp"] = hp;
+            toSave["energy"] = energy;
+            toSave["pos"] = Tuple.Create(y, x);
+
+            return toSave;
         }
     }
 }

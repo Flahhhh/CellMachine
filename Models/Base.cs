@@ -14,7 +14,7 @@ namespace Models
         {
             return ActionType.NONE;
         }
-        public Dictionary<String, object> Serialize(int y, int x)
+        virtual public Dictionary<String, object> ToJson(int y, int x)
         {
             throw new NotImplementedException();
         }

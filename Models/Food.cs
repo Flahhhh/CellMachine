@@ -23,5 +23,15 @@ namespace Models
             return ActionType.NONE;
         }
 
+        public override Dictionary<string, object> ToJson(int y, int x)
+        {
+            Dictionary<String, object> toSave = new Dictionary<string, object>();
+            toSave["type"] = "Food";
+            toSave["energy"] = energy;
+            toSave["pos"] = Tuple.Create(y, x);
+
+            return toSave;
+        }
+
     }
 }
