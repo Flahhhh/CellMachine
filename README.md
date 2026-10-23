@@ -8,7 +8,7 @@
 ![Simulation state example](https://github.com/user-attachments/assets/9f945453-c2e5-48d2-bae4-1698e9787d6a)
 |№|Seed|Video|
 |---|---|---|
-|**1**|**2026**|<video src="https://github.com/user-attachments/assets/26e4d863-1491-4d28-ba21-b19288dffb50" autoplay loop muted playsinline width="100%"></video>|
+|**1**|**4242**|<video src="https://github.com/user-attachments/assets/7d9dc0ac-ceb2-47fa-a1f8-7dd1947f1e66" autoplay loop muted playsinline width="100%"></video>|
 |**2**|**1994**|<video src="https://github.com/user-attachments/assets/aae86f76-ea91-4267-94d3-830a77366a3a" autoplay loop muted playsinline width="100%"></video>|
 ---
 ## Mathematical Formulation
