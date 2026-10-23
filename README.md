@@ -9,7 +9,7 @@
 |№|Seed|Video|
 |---|---|---|
 |**1**|**2026**|<video src="https://github.com/user-attachments/assets/26e4d863-1491-4d28-ba21-b19288dffb50" autoplay loop muted playsinline width="100%"></video>|
-|**2**|**42**|<video src="(https://github.com/user-attachments/assets/c6c6eb46-59f5-47ac-bbdf-518085bb8000" autoplay loop muted playsinline width="100%"></video>|
+|**2**|**1994**|<video src="https://github.com/user-attachments/assets/aae86f76-ea91-4267-94d3-830a77366a3a" autoplay loop muted playsinline width="100%"></video>|
 ---
 ## Mathematical Formulation
 At any given simulation tick t, the cell's state is defined by the pointer $P_t \in [0, N-1]$, where N is the `geneSize`. The genome consists of two arrays of size N:
